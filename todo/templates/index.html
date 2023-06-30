@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8">
+		<title>EC2講座サンプル</title>
+	</head>
+	<body>
+		<ul>
+			{% for todo in object_list %}
+			<li>
+				<input id="todo_{{ todo.id }}" type="checkbox" class="isDone" {% if todo.is_done is True %}checked{% endif %}>
+			
+				<label for="todo_{{ todo.id }}">{{ todo.title }}</label>
+			</li>
+			{% endfor %}
+		</ul>
+		<form method="POST">
+		{% csrf_token %}
+			{{ form.as_p }}
+			<button type="submit" name="save">保存</button>
+		</form>
+	</body>
+	<script>
+		function done(id, is_done) {
+			let form = document.createElement('form');
+			let todo = document.createElement('input');
+			let isDone = document.createElement('input');
+			let csrf = document.createElement('input');
+
+			form.method = 'POST';
+			form.action = location.protocol+'//'+location.host+'/done/'
+
+			todo.type = 'hidden';
+			todo.name = 'id';
+			todo.value = id.toString();
+
+			isDone.type = 'hidden';
+			isDone.name = 'is_done';
+			if(is_done == true) {isDone.value = true;}
+			else {isDone.value = false;}
+
+			csrf.type = 'hidden';
+			csrf.name = 'csrfmiddlewaretoken';
+			csrf.value = '{{ csrf_token }}'
+
+			form.appendChild(csrf);
+			form.appendChild(todo);
+			form.appendChild(isDone);
+			document.body.appendChild(form);
+
+			form.submit();
+		}
+
+		let checkButtons = document.getElementsByClassName('isDone');
+		for (let i=0; i<checkButtons.length; i++) {
+			checkButtons[i].addEventListener(
+				"click",
+				function () {
+					let isDone = document.getElementById('todo_'+(i+1)).checked;
+					done(i+1, isDone);
+				}
+			)
+		}
+	</script>
+</html>
+
